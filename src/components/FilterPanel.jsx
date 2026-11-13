@@ -27,9 +27,9 @@ export const FilterPanel = ({
     <div
       style={{
         backgroundColor: '#ffffff',
-        borderRadius: 'var(--radius-lg)',
+        borderRadius: 'var(--radius-md)',
         border: '1px solid var(--border-light)',
-        padding: '1.5rem',
+        padding: '1.1rem',
         boxShadow: 'var(--shadow-xs)'
       }}
     >
@@ -38,24 +38,24 @@ export const FilterPanel = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '1.25rem',
-          paddingBottom: '0.75rem',
+          marginBottom: '1rem',
+          paddingBottom: '0.6rem',
           borderBottom: '1px solid var(--border-light)'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <SlidersHorizontal size={18} color="var(--primary)" />
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Filters</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <SlidersHorizontal size={15} color="var(--primary)" />
+          <h3 style={{ fontSize: '0.98rem', fontWeight: 700 }}>Filter Textbooks</h3>
         </div>
 
         {hasActiveFilters && (
           <button
             onClick={onResetFilters}
             className="btn btn-ghost btn-sm"
-            style={{ color: 'var(--accent)', fontSize: '0.8rem', padding: '0.2rem 0.5rem' }}
+            style={{ color: 'var(--accent)', fontSize: '0.75rem', padding: '0.15rem 0.4rem' }}
           >
-            <RotateCcw size={13} />
-            Reset All
+            <RotateCcw size={11} />
+            Reset
           </button>
         )}
       </div>

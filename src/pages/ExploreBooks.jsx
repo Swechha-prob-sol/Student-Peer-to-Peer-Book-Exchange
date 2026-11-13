@@ -153,13 +153,13 @@ export const ExploreBooks = () => {
   }
 
   return (
-    <div className="explore-page page-wrapper" style={{ padding: '2.5rem 0 5rem 0' }}>
+    <div className="explore-page page-wrapper" style={{ padding: '1.5rem 0 3.5rem 0' }}>
       <div className="container">
         {/* Header */}
-        <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '2.2rem', marginBottom: '0.4rem' }}>Explore Academic Marketplace</h1>
-          <p style={{ color: 'var(--text-muted)' }}>
-            Find course textbooks, engineering lab manuals, and exam guides posted by students near you.
+        <div style={{ marginBottom: '1.25rem' }}>
+          <h1 style={{ fontSize: '1.8rem', marginBottom: '0.2rem' }}>Academic Textbook Marketplace</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            Browse available syllabus textbooks, GATE reference materials, and engineering course guides listed by peers.
           </p>
         </div>
 
@@ -167,13 +167,13 @@ export const ExploreBooks = () => {
         <div
           style={{
             display: 'flex',
-            gap: '1rem',
-            marginBottom: '1.5rem',
+            gap: '0.75rem',
+            marginBottom: '1.25rem',
             alignItems: 'center',
             flexWrap: 'wrap'
           }}
         >
-          <div style={{ flex: '1', minWidth: '280px' }}>
+          <div style={{ flex: '1', minWidth: '260px' }}>
             <SearchBar
               value={searchTerm}
               onChange={setSearchTerm}
@@ -183,13 +183,13 @@ export const ExploreBooks = () => {
           </div>
 
           {/* Sort By Dropdown */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '200px' }}>
-            <ArrowDownUp size={16} color="var(--text-muted)" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: '180px' }}>
+            <ArrowDownUp size={15} color="var(--text-muted)" />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="form-select"
-              style={{ height: '48px', padding: '0.5rem 1rem' }}
+              style={{ height: '42px', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
             >
               <option value="newest">Newest Listed First</option>
               <option value="oldest">Oldest Listed First</option>
@@ -203,9 +203,9 @@ export const ExploreBooks = () => {
           <button
             onClick={() => setMobileFilterOpen(true)}
             className="btn btn-outline filter-toggle-mobile-btn"
-            style={{ display: 'none', height: '48px', alignItems: 'center', gap: '0.5rem' }}
+            style={{ display: 'none', height: '42px', alignItems: 'center', gap: '0.4rem' }}
           >
-            <Filter size={18} />
+            <Filter size={16} />
             <span>Filters ({activePills.length})</span>
           </button>
         </div>
@@ -280,13 +280,13 @@ export const ExploreBooks = () => {
           className="explore-grid-layout"
           style={{
             display: 'grid',
-            gridTemplateColumns: '260px 1fr',
-            gap: '2rem',
+            gridTemplateColumns: '240px 1fr',
+            gap: '1.5rem',
             alignItems: 'start'
           }}
         >
           {/* Desktop Left Sidebar Filter Panel */}
-          <div className="filter-panel-desktop" style={{ position: 'sticky', top: '90px' }}>
+          <div className="filter-panel-desktop" style={{ position: 'sticky', top: '75px' }}>
             <FilterPanel
               filters={filters}
               onFilterChange={handleFilterChange}
@@ -303,11 +303,11 @@ export const ExploreBooks = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: '1.25rem'
+                marginBottom: '1rem'
               }}
             >
-              <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                Showing <strong>{visibleBooks.length}</strong> of <strong>{filteredBooks.length}</strong> books
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                Showing <strong>{visibleBooks.length}</strong> of <strong>{filteredBooks.length}</strong> verified books
               </span>
             </div>
 
@@ -315,7 +315,7 @@ export const ExploreBooks = () => {
             {filteredBooks.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon-wrap">
-                  <BookOpen size={30} />
+                  <BookOpen size={28} />
                 </div>
                 <h3 className="empty-title">No books match your criteria</h3>
                 <p className="empty-desc">
@@ -331,8 +331,8 @@ export const ExploreBooks = () => {
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-                    gap: '1.5rem'
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(225px, 1fr))',
+                    gap: '1.25rem'
                   }}
                 >
                   {visibleBooks.map((book) => (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, User, Sparkles, BookOpen } from 'lucide-react';
+import { Heart, User, BookOpen } from 'lucide-react';
 import { useBooks } from '../context/BookContext';
 import { RatingStars } from './RatingStars';
 import { StatusBadge } from './StatusBadge';
@@ -28,7 +28,7 @@ export const BookCard = ({ book }) => {
           alt={book.title}
           className="book-card-img"
           subject={book.subject}
-          height="230px"
+          height="175px"
         />
 
         <div className="book-card-badge">
@@ -41,7 +41,7 @@ export const BookCard = ({ book }) => {
           aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           title={inWishlist ? 'Remove from wishlist' : 'Save to wishlist'}
         >
-          <Heart size={18} fill={inWishlist ? '#EF4444' : 'none'} color={inWishlist ? '#EF4444' : '#64748B'} />
+          <Heart size={14} fill={inWishlist ? '#EF4444' : 'none'} color={inWishlist ? '#EF4444' : '#64748B'} />
         </button>
       </div>
 
@@ -59,12 +59,13 @@ export const BookCard = ({ book }) => {
         </Link>
 
         <p className="book-card-author" title={book.author}>
-          by {book.author}
+          {book.author}
         </p>
 
         <div className="book-card-details-row">
-          <span>Ed: <strong>{book.edition}</strong></span>
-          <span>Condition: <strong>{book.condition}</strong></span>
+          <span>{book.edition}</span>
+          <span>•</span>
+          <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{book.condition}</span>
         </div>
 
         <div className="book-card-seller">
@@ -73,22 +74,19 @@ export const BookCard = ({ book }) => {
             className="seller-info"
             style={{ textDecoration: 'none' }}
           >
-            <User size={14} color="var(--text-muted)" />
-            <span style={{ fontSize: '0.85rem' }}>{book.sellerName}</span>
+            <User size={12} color="var(--text-muted)" />
+            <span style={{ fontSize: '0.78rem' }}>{book.sellerName}</span>
           </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <RatingStars rating={book.sellerRating || 5.0} size={13} />
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-              ({book.sellerRating})
-            </span>
-          </div>
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', maxWidth: '90px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={book.sellerCollege}>
+            {book.sellerCollege?.split(' ')[0]}
+          </span>
         </div>
 
         <div className="book-card-footer">
           <div className="book-price-block">
             <span className="book-price-label">Price</span>
             {book.listingType === 'For Exchange' ? (
-              <span className="book-price-free">Exchange Only</span>
+              <span className="book-price-free">Swap only</span>
             ) : (
               <span className="book-price-value">₹{book.price}</span>
             )}
@@ -98,11 +96,10 @@ export const BookCard = ({ book }) => {
             onClick={() => navigate(`/books/${book.id}`)}
             className="btn btn-outline btn-sm"
           >
-            View Details
+            View
           </button>
         </div>
       </div>
     </div>
   );
 };
-

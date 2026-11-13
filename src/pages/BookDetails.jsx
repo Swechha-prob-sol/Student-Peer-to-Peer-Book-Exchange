@@ -122,10 +122,10 @@ export const BookDetails = () => {
   };
 
   return (
-    <div className="book-details-page page-wrapper" style={{ padding: '2.5rem 0 5rem 0' }}>
+    <div className="book-details-page page-wrapper" style={{ padding: '1.5rem 0 3.5rem 0' }}>
       <div className="container">
         {/* Back Link */}
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ marginBottom: '1rem' }}>
           <button
             onClick={() => navigate(-1)}
             className="btn btn-ghost btn-sm"
@@ -141,10 +141,10 @@ export const BookDetails = () => {
           className="book-details-grid card"
           style={{
             display: 'grid',
-            gridTemplateColumns: '380px 1fr',
-            gap: '3rem',
-            padding: '2.5rem',
-            marginBottom: '3rem',
+            gridTemplateColumns: '290px 1fr',
+            gap: '2rem',
+            padding: '1.75rem',
+            marginBottom: '2rem',
             overflow: 'hidden'
           }}
         >
@@ -152,9 +152,9 @@ export const BookDetails = () => {
           <div>
             <div
               style={{
-                borderRadius: 'var(--radius-lg)',
+                borderRadius: 'var(--radius-md)',
                 overflow: 'hidden',
-                boxShadow: 'var(--shadow-lg)',
+                boxShadow: 'var(--shadow-sm)',
                 border: '1px solid var(--border-light)',
                 position: 'relative'
               }}
@@ -162,11 +162,11 @@ export const BookDetails = () => {
               <BookCover
                 src={book.coverImage}
                 alt={book.title}
-                height="420px"
+                height="340px"
                 subject={book.subject}
                 className="book-details-cover"
               />
-              <div style={{ position: 'absolute', top: '1rem', left: '1rem' }}>
+              <div style={{ position: 'absolute', top: '0.75rem', left: '0.75rem' }}>
                 <StatusBadge status={book.listingType} type="listingType" />
               </div>
             </div>
@@ -174,14 +174,14 @@ export const BookDetails = () => {
             {/* Quick Specs Grid */}
             <div
               style={{
-                marginTop: '1.5rem',
+                marginTop: '1rem',
                 backgroundColor: 'var(--bg-subtle)',
                 borderRadius: 'var(--radius-md)',
-                padding: '1rem 1.25rem',
+                padding: '0.85rem 1rem',
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: '0.75rem',
-                fontSize: '0.85rem'
+                gap: '0.5rem',
+                fontSize: '0.82rem'
               }}
             >
               <div>

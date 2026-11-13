@@ -54,25 +54,25 @@ export const Dashboard = () => {
         {/* Welcome Header */}
         <div className="dashboard-header">
           <div>
-            <span className="section-badge" style={{ marginBottom: '0.4rem' }}>
-              <Sparkles size={14} /> Student Dashboard
+            <span className="section-badge" style={{ marginBottom: '0.25rem' }}>
+              {currentUser.college}
             </span>
-            <h1 style={{ fontSize: '1.85rem', marginBottom: '0.2rem' }}>
-              Welcome back, {currentUser.name.split(' ')[0]}! 👋
+            <h1 style={{ fontSize: '1.5rem', marginBottom: '0.15rem' }}>
+              Welcome back, {currentUser.name.split(' ')[0]}
             </h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              {currentUser.college} • {currentUser.department} (Sem {currentUser.semester})
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+              {currentUser.department} • Semester {currentUser.semester}
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
             <Link to="/explore" className="btn btn-outline btn-sm">
-              <BookOpen size={16} />
+              <BookOpen size={14} />
               Browse Market
             </Link>
             <Link to="/add-book" className="btn btn-primary btn-sm">
-              <PlusCircle size={16} />
-              List New Book
+              <PlusCircle size={14} />
+              List Book
             </Link>
           </div>
         </div>
