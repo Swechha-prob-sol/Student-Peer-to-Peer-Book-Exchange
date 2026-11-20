@@ -67,7 +67,7 @@ public abstract class User implements Displayable {
         return name;
     }
 
-    public void setName(String name) {
+    public final void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
             this.name = "Unknown Student";
         } else {
@@ -79,7 +79,7 @@ public abstract class User implements Displayable {
         return email;
     }
 
-    public void setEmail(String email) {
+    public final void setEmail(String email) {
         if (email != null && email.contains("@") && email.contains(".")) {
             this.email = email.trim().toLowerCase();
         } else {

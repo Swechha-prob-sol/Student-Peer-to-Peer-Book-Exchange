@@ -1,0 +1,65 @@
+====================================================
+   BOOKLOOP DATA EXPORT REPORT
+   Generated: 2026-11-17T21:35:16.235052600
+====================================================
+
+STUDENTS (10 records)
+----------------------------------------------------
+  [STU110] Tanvi Joshi | COEP Pune | Sem 4 | Rating: 5.0★
+  [STU102] Priya Patel | BITS Pilani | Sem 4 | Rating: 4.8★
+  [STU101] Aarav Sharma | Delhi Technological University (DTU) | Sem 5 | Rating: 4.9★
+  [STU104] Ananya Iyer | VIT Vellore | Sem 3 | Rating: 5.0★
+  [STU103] Rohan Verma | IIT Bombay | Sem 6 | Rating: 4.7★
+  [STU106] Sneha Reddy | IIIT Hyderabad | Sem 4 | Rating: 4.9★
+  [STU105] Vikram Malhotra | NIT Trichy | Sem 5 | Rating: 4.6★
+  [STU108] Meera Nair | Manipal Institute of Technology | Sem 3 | Rating: 4.8★
+  [STU107] Devansh Gupta | Netaji Subhas University of Technology (NSUT) | Sem 6 | Rating: 4.5★
+  [STU109] Kabir Mehta | Thapar Institute of Engineering and Technology | Sem 5 | Rating: 4.4★
+
+BOOKS (25 records)
+----------------------------------------------------
+  [BK220] "Design Patterns: Elements of Reusable Object-Oriented Software" by Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides (GoF) | Rs.540 | Active
+  [BK203] "Operating System Concepts (Dinosaur Book)" by Abraham Silberschatz, Peter B. Galvin, Greg Gagne | Rs.380 | Active
+  [BK225] "Head First Java" by Kathy Sierra, Bert Bates | Rs.450 | Active
+  [BK204] "Computer Networks: A Systems Approach" by Larry L. Peterson, Bruce S. Davie | Rs.420 | Active
+  [BK205] "Artificial Intelligence: A Modern Approach" by Stuart Russell, Peter Norvig | Rs.750 | Active
+  [BK206] "Pattern Recognition and Machine Learning" by Christopher M. Bishop | Rs.680 | Active
+  [BK221] "Cell and Molecular Biology: Concepts and Experiments" by Gerald Karp | Rs.480 | Active
+  [BK222] "Basic Structural Analysis" by C.S. Reddy | Rs.360 | Active
+  [BK201] "Introduction to Algorithms (CLRS)" by Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest | Rs.650 | Active
+  [BK223] "Deep Learning" by Ian Goodfellow, Yoshua Bengio, Aaron Courville | Rs.790 | Active
+  [BK202] "Database System Concepts" by Abraham Silberschatz, Henry F. Korth, S. Sudarshan | Rs.490 | Active
+  [BK224] "Engineering Physics" by H.K. Malik, A.K. Singh | Rs.240 | Active
+  [BK207] "Higher Engineering Mathematics" by Dr. B.S. Grewal | Rs.350 | Active
+  [BK208] "Digital Logic and Computer Design" by M. Morris Mano | Rs.280 | Active
+  [BK209] "Compilers: Principles, Techniques, and Tools (Dragon Book)" by Alfred V. Aho, Monica S. Lam, Ravi Sethi, Jeffrey D. Ullman | Rs.580 | Active
+  [BK214] "Theory of Computation: Formal Languages and Automata" by Michael Sipser | Rs.530 | Active
+  [BK215] "Let Us C" by Yashavant Kanetkar | Rs.180 | Active
+  [BK216] "Clean Code: A Handbook of Agile Software Craftsmanship" by Robert C. Martin (Uncle Bob) | Rs.620 | Active
+  [BK217] "Discrete Mathematics and Its Applications" by Kenneth H. Rosen | Rs.540 | Active
+  [BK210] "Java: The Complete Reference" by Herbert Schildt | Rs.520 | Sold
+  [BK211] "Signals and Systems" by Alan V. Oppenheim, Alan S. Willsky, S. Hamid Nawab | Rs.460 | Active
+  [BK212] "Computer Organization and Architecture" by William Stallings | Rs.410 | Active
+  [BK213] "Software Engineering: A Practitioner's Approach" by Roger S. Pressman, Bruce R. Maxim | Rs.320 | Active
+  [BK218] "Microprocessor Architecture, Programming and Applications with 8085" by Ramesh S. Gaonkar | Rs.310 | Active
+  [BK219] "Internal Combustion Engines" by V. Ganesan | Rs.390 | Active
+
+EXCHANGE REQUESTS (8 records)
+----------------------------------------------------
+  [REQ308] Purchase for "Java: The Complete Reference" | Completed | 4/5 Exchange / Sale Completed
+  [REQ307] Purchase for "Computer Networks: A Systems Approach" | Pending | 1/5 Request Sent
+  [REQ306] Exchange for "Operating System Concepts (Dinosaur Book)" | Completed | 5/5 Review Submitted
+  [REQ305] Purchase for "Higher Engineering Mathematics" | Rejected | 1/5 Request Sent
+  [REQ304] Exchange for "Introduction to Algorithms (CLRS)" | Accepted | 2/5 Request Accepted
+  [REQ303] Purchase for "Design Patterns: Elements of Reusable Object-Oriented Software" | Completed | 4/5 Exchange / Sale Completed
+  [REQ302] Purchase for "Java: The Complete Reference" | Accepted | 3/5 Contact Established
+  [REQ301] Exchange for "Artificial Intelligence: A Modern Approach" | Pending | 1/5 Request Sent
+
+RATINGS (6 records)
+----------------------------------------------------
+  [REV401] 5.0★ by Vikram Malhotra for seller STU101
+  [REV402] 5.0★ by Ananya Iyer for seller STU101
+  [REV403] 4.8★ by Aarav Sharma for seller STU102
+  [REV404] 4.5★ by Devansh Gupta for seller STU103
+  [REV405] 5.0★ by Sneha Reddy for seller STU104
+  [REV406] 5.0★ by Vikram Malhotra for seller STU102

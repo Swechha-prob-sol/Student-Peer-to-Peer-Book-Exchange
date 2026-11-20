@@ -79,7 +79,7 @@ public class Student extends User {
         return semester;
     }
 
-    public void setSemester(int semester) {
+    public final void setSemester(int semester) {
         if (semester >= 1 && semester <= 8) {
             this.semester = semester;
         } else {

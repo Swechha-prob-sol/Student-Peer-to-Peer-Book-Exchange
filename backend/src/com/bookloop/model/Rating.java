@@ -72,7 +72,7 @@ public class Rating implements Displayable {
         return rating;
     }
 
-    public void setRating(double rating) {
+    public final void setRating(double rating) {
         // Enforce rating bounds between 1.0 and 5.0
         this.rating = Math.max(1.0, Math.min(5.0, rating));
     }

@@ -123,7 +123,7 @@ public class Book extends Item implements Comparable<Book> {
         return semester;
     }
 
-    public void setSemester(int semester) {
+    public final void setSemester(int semester) {
         if (semester >= 1 && semester <= 8) {
             this.semester = semester;
         } else {
@@ -151,7 +151,7 @@ public class Book extends Item implements Comparable<Book> {
         return price;
     }
 
-    public void setPrice(double price) {
+    public final void setPrice(double price) {
         this.price = Math.max(0.0, price);
     }
 

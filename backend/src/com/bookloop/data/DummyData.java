@@ -1,6 +1,7 @@
 package com.bookloop.data;
 
 import com.bookloop.model.*;
+import com.bookloop.persistence.FileStorageManager;
 
 /**
  * Compulsory DummyData class providing realistic, high-fidelity Indian college mock data.
@@ -10,6 +11,7 @@ import com.bookloop.model.*;
  * - Realistic exchange and purchase requests covering all lifecycle statuses and tracking steps
  * - Verified peer ratings and reviews
  * - Automatic single-time initialization guard (prevents duplicate data creation)
+ * - Loads from saved files first; falls back to dummy data only when no saved data exists
  * - Complete reset capability (resetToDefault)
  */
 public class DummyData {
@@ -17,13 +19,29 @@ public class DummyData {
     private static boolean isInitialized = false;
 
     /**
-     * Initializes dummy data if not already populated.
+     * Initializes data: loads from saved files if they exist, otherwise uses dummy data.
+     * Demonstrates conditional data loading to avoid overwriting saved records.
      */
     public static synchronized void initialize(DataStore store) {
         if (isInitialized && !store.getAllBooks().isEmpty()) {
             return; // Guard against duplicate data loading
         }
 
+        // Try loading from saved files first
+        try {
+            boolean loadedFromFile = store.loadFromFiles();
+            if (loadedFromFile) {
+                System.out.println("[INFO] Data loaded from saved files.");
+                isInitialized = true;
+                return;
+            }
+        } catch (java.io.IOException e) {
+            System.err.println("[WARN] Could not load saved data: " + e.getMessage());
+            System.out.println("[INFO] Falling back to dummy data...");
+        }
+
+        // No saved data exists - load dummy data
+        System.out.println("[INFO] No saved data found. Loading dummy data...");
         populateStudents(store);
         populateBooks(store);
         populateRequests(store);
@@ -34,11 +52,18 @@ public class DummyData {
 
     /**
      * Resets the entire data store back to the clean baseline dummy records.
+     * Deletes saved files and reloads original dummy data.
      */
     public static synchronized void resetToDefault(DataStore store) {
         store.clearAll();
+        // Delete saved files so dummy data is used on next start
+        FileStorageManager.deleteAllDataFiles();
         isInitialized = false;
-        initialize(store);
+        populateStudents(store);
+        populateBooks(store);
+        populateRequests(store);
+        populateRatings(store);
+        isInitialized = true;
         store.logActivity("System reset to baseline dummy dataset successfully.");
     }
 

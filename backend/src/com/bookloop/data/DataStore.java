@@ -4,10 +4,12 @@ import com.bookloop.model.Book;
 import com.bookloop.model.ExchangeRequest;
 import com.bookloop.model.Rating;
 import com.bookloop.model.Student;
+import com.bookloop.persistence.FileStorageManager;
+import java.io.IOException;
 import java.util.*;
 
 /**
- * In-memory Data Storage layer showcasing the Java Collections Framework.
+ * In-memory Data Storage layer with file persistence integration.
  * Demonstrates:
  * - HashMap: O(1) primary key lookup for students, books, requests
  * - LinkedHashMap: preserves book insertion order
@@ -21,6 +23,7 @@ import java.util.*;
  * - Deque (ArrayDeque): double-ended queue for recent search keyword history
  * - Iterator & ListIterator: safe collection traversal and modification
  * - Collections utility methods: sort, unmodifiableList, reverse, etc.
+ * - File-based persistence: load/save to CSV files
  */
 public class DataStore {
 
@@ -61,7 +64,7 @@ public class DataStore {
 
     // Private constructor for singleton pattern
     private DataStore() {
-        // Initialized via DummyData
+        // Initialized via DummyData or file loading
     }
 
     public static synchronized DataStore getInstance() {
@@ -69,6 +72,87 @@ public class DataStore {
             instance = new DataStore();
         }
         return instance;
+    }
+
+    // ==========================================
+    // File Persistence: Load & Save
+    // ==========================================
+
+    /**
+     * Loads all data from CSV files into memory.
+     * Returns true if data was loaded from files, false if no saved data exists.
+     * Demonstrates exception propagation with throws clause.
+     */
+    public boolean loadFromFiles() throws IOException {
+        if (!FileStorageManager.savedDataExists()) {
+            return false;
+        }
+
+        List<Student> students = FileStorageManager.loadStudents();
+        List<Book> books = FileStorageManager.loadBooks();
+        List<ExchangeRequest> requests = FileStorageManager.loadRequests();
+        List<Rating> ratings = FileStorageManager.loadRatings();
+
+        if (students.isEmpty() && books.isEmpty()) {
+            return false;
+        }
+
+        // Clear existing data before loading
+        clearAll();
+
+        // Load students
+        for (Student s : students) {
+            studentsMap.put(s.getId(), s);
+            registeredEmails.add(s.getEmail().toLowerCase());
+        }
+
+        // Load books (and rebuild indexes)
+        for (Book b : books) {
+            booksMap.put(b.getId(), b);
+            recentListingsCache.put(b.getId(), b);
+            booksByPriceIndex.computeIfAbsent(b.getPrice(), k -> new ArrayList<>()).add(b);
+            uniqueSubjects.add(b.getSubject());
+            uniqueAuthors.add(b.getAuthor());
+        }
+
+        // Load requests
+        for (ExchangeRequest r : requests) {
+            requestsMap.put(r.getId(), r);
+            pendingRequestsQueue.offer(r);
+        }
+
+        // Load ratings (without re-triggering seller rating recalculation)
+        ratingsList.addAll(ratings);
+
+        logActivity("Data loaded from saved files (" + students.size() + " students, " +
+                books.size() + " books, " + requests.size() + " requests, " +
+                ratings.size() + " ratings)");
+
+        return true;
+    }
+
+    /**
+     * Saves all data to CSV files.
+     * Demonstrates exception handling with try-catch-finally pattern.
+     */
+    public void saveToFiles() {
+        boolean success = false;
+        try {
+            FileStorageManager.saveStudents(getAllStudents());
+            FileStorageManager.saveBooks(getAllBooks());
+            FileStorageManager.saveRequests(getAllRequests());
+            FileStorageManager.saveRatings(new ArrayList<>(ratingsList));
+            success = true;
+        } catch (IOException e) {
+            System.err.println("[ERROR] Failed to save data: " + e.getMessage());
+        } finally {
+            // finally block always executes
+            if (success) {
+                logActivity("All data saved to files successfully.");
+            } else {
+                logActivity("Data save attempt failed.");
+            }
+        }
     }
 
     // ==========================================

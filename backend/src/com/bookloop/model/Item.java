@@ -54,7 +54,7 @@ public abstract class Item implements Displayable, Searchable {
         return title;
     }
 
-    public void setTitle(String title) {
+    public final void setTitle(String title) {
         this.title = (title != null && !title.trim().isEmpty()) ? title.trim() : "Untitled";
     }
 

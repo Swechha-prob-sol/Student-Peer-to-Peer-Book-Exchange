@@ -102,7 +102,7 @@ public class ExchangeRequest extends Request implements Comparable<ExchangeReque
         return trackingStep;
     }
 
-    public void setTrackingStep(int trackingStep) {
+    public final void setTrackingStep(int trackingStep) {
         if (trackingStep >= 1 && trackingStep <= 5) {
             this.trackingStep = trackingStep;
         } else {
