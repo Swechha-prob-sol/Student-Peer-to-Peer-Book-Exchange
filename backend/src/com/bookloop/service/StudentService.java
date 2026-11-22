@@ -3,11 +3,12 @@ package com.bookloop.service;
 import com.bookloop.data.DataStore;
 import com.bookloop.model.Student;
 import com.bookloop.model.User;
+import com.bookloop.util.ValidationUtil;
 import java.util.List;
 
 /**
  * Service handling student registration, authentication, and profile lookups.
- * Demonstrates business logic separation and input validation.
+ * Demonstrates business logic separation and input validation using ValidationUtil.
  */
 public class StudentService {
     private final DataStore store;
@@ -19,21 +20,15 @@ public class StudentService {
 
     /**
      * Registers a new student in the system.
-     * Demonstrates validation and encapsulation rules.
+     * Demonstrates validation and encapsulation rules via ValidationUtil.
      */
     public Student registerStudent(String name, String email, String phone,
                                    String college, String department, int semester) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Student name cannot be empty.");
-        }
-        if (!User.isValidCollegeEmail(email)) {
-            throw new IllegalArgumentException("Invalid college email format. Example: name@college.ac.in");
-        }
+        // Enforce validation rules using reusable ValidationUtil
+        ValidationUtil.validateStudent(name, email, phone, college, department, semester);
+
         if (store.isEmailRegistered(email)) {
             throw new IllegalArgumentException("A student is already registered with this email: " + email);
-        }
-        if (semester < 1 || semester > 8) {
-            throw new IllegalArgumentException("Semester must be between 1 and 8.");
         }
 
         String studentId = "STU" + (nextStudentIdNum++);

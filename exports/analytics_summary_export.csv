@@ -1,0 +1,66 @@
+# BOOKLOOP PLATFORM ANALYTICS & EXECUTIVE SUMMARY REPORT
+# Generated At: 2026-11-22T11:47:35.3237548
+
+SECTION 1: CORE PLATFORM KEY PERFORMANCE INDICATORS
+Metric,Value
+Total Registered Students,9
+Total Textbooks Listed (All-Time),24
+Active Textbooks Available,24
+Books Available for Sale,24
+Books Available for Exchange,11
+Dual Mode Books (Sale and Swap),11
+Total Catalog Valuation (INR),11270.00
+Average Seller Reputation Score,4.73
+Pending Requests,1
+Accepted Requests,2
+Completed Transactions,2
+Rejected Requests,1
+
+SECTION 2: TEXTBOOK DISTRIBUTION ACROSS SEMESTERS (1D ARRAY)
+Semester,Total_Books
+Semester 1,3
+Semester 2,1
+Semester 3,4
+Semester 4,6
+Semester 5,4
+Semester 6,5
+Semester 7,1
+Semester 8,0
+
+SECTION 3: MOST POPULAR ACADEMIC SUBJECTS (FREQUENCY RANKING)
+Rank,Subject,Book_Count
+1,Software Engineering,2
+2,Artificial Intelligence,1
+3,Biotechnology,1
+4,Civil Engineering,1
+5,Compiler Design,1
+6,Computer Architecture,1
+7,Computer Networks,1
+8,Data Structures and Algorithms,1
+9,Database Management Systems,1
+10,Deep Learning,1
+11,Digital Electronics,1
+12,Discrete Mathematics,1
+13,Engineering Mathematics,1
+14,Engineering Physics,1
+15,Machine Learning,1
+16,Mechanical Engineering,1
+17,Microprocessors,1
+18,Object Oriented Programming,1
+19,Operating Systems,1
+20,Programming in C,1
+21,Signals and Systems,1
+22,Software Architecture,1
+23,Theory of Computation,1
+
+SECTION 4: TOP ACTIVE SELLERS LEADERBOARD
+Rank,Student_ID,Student_Name,College,Rating,Books_Listed,Books_Sold,Books_Exchanged,Activity_Score
+1,STU101,Aarav Sharma,Delhi Technological University (DTU),4.9,4,12,6,106
+2,STU104,Ananya Iyer,VIT Vellore,5.0,3,11,5,96
+3,STU102,Priya Patel,BITS Pilani,4.8,3,9,5,85
+4,STU106,Sneha Reddy,IIIT Hyderabad,4.9,3,7,5,75
+5,STU103,Rohan Verma,IIT Bombay,4.7,3,8,3,72
+6,STU108,Meera Nair,Manipal Institute of Technology,4.8,1,8,3,68
+7,STU105,Vikram Malhotra,NIT Trichy,4.6,3,6,4,65
+8,STU107,Devansh Gupta,Netaji Subhas University of Technology (NSUT),4.5,3,5,2,52
+9,STU109,Kabir Mehta,Thapar Institute of Engineering and Technology,4.4,1,4,2,43

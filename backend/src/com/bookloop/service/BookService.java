@@ -9,6 +9,7 @@ import com.bookloop.model.Book;
 import com.bookloop.model.Condition;
 import com.bookloop.model.ListingType;
 import com.bookloop.model.Student;
+import com.bookloop.util.ValidationUtil;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,18 +39,10 @@ public class BookService {
                         String category, int semester, String edition, Condition condition,
                         double price, ListingType listingType, String preferredExchange,
                         String description, Student seller) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Book title cannot be blank.");
-        }
-        if (author == null || author.trim().isEmpty()) {
-            throw new IllegalArgumentException("Author name cannot be blank.");
-        }
         if (seller == null) {
             throw new IllegalArgumentException("Seller must be a valid registered student.");
         }
-        if (price < 0) {
-            throw new IllegalArgumentException("Price cannot be negative.");
-        }
+        ValidationUtil.validateBook(title, author, isbn, subject, semester, price, listingType);
 
         String bookId = "BK" + (nextBookIdNum++);
         String dateListed = LocalDate.now().toString();

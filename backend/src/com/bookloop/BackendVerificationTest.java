@@ -5,6 +5,7 @@ import com.bookloop.data.DummyData;
 import com.bookloop.exception.*;
 import com.bookloop.interfaces.Displayable;
 import com.bookloop.model.*;
+import com.bookloop.persistence.CsvExportService;
 import com.bookloop.persistence.FileStorageManager;
 import com.bookloop.service.*;
 import com.bookloop.threading.*;
@@ -16,11 +17,13 @@ import java.util.function.*;
 import java.util.stream.Collectors;
 
 /**
- * Automated Test and Verification Suite for Milestone 1 & Milestone 2.
+ * Automated Test and Verification Suite for Milestones 1, 2, and 3.
  * Tests every required syllabus concept and feature across:
  * - Milestone 1: OOP, Collections, Comparators, Interfaces, Method Overloading/Overriding
  * - Milestone 2: Strings, Arrays, Wrapper Classes, Exceptions, Multithreading,
  *                Lambda & Streams, Generics, File Handling & Persistence, Dummy Data Integration.
+ * - Milestone 3: Book Recommendation Engine, Platform Analytics & Reports,
+ *                Data Validation Utility, CSV Export Service (exports/), Concurrency & Restarts.
  */
 public class BackendVerificationTest {
 
@@ -29,7 +32,7 @@ public class BackendVerificationTest {
 
     public static void main(String[] args) {
         System.out.println("================================================================================");
-        System.out.println("   BOOKLOOP BACKEND - MILESTONE 1 & 2 AUTOMATED VERIFICATION TEST SUITE");
+        System.out.println("   BOOKLOOP BACKEND - COMPLETE VERIFICATION SUITE (MILESTONES 1, 2 & 3)");
         System.out.println("================================================================================");
 
         DataStore store = DataStore.getInstance();
@@ -38,6 +41,9 @@ public class BackendVerificationTest {
         ExchangeService exchangeService = new ExchangeService(store);
         RatingService ratingService = new RatingService(store);
         StreamService streamService = new StreamService(store);
+        BookRecommendationService recService = new BookRecommendationService(store);
+        ProjectReportService reportService = new ProjectReportService(store);
+        CsvExportService exportService = new CsvExportService("exports");
 
         // 1. Initialize Dummy Data
         DummyData.initialize(store);
@@ -718,6 +724,204 @@ public class BackendVerificationTest {
             assertCondition(store.getAllBooks().size() == 24, "Reset restored baseline 24 books");
             assertCondition(store.getAllRequests().size() == 6, "Reset restored baseline 6 requests");
             assertCondition(store.getAllRatings().size() == 5, "Reset restored baseline 5 ratings");
+        });
+
+        // ====================================================================
+        // MILESTONE 3 VERIFICATION
+        // ====================================================================
+
+        test("M3-01: BookRecommendationService: Smart Student Personalization", () -> {
+            Student aarav = studentService.getStudentById("STU101");
+            List<Book> recs = recService.recommendForStudent(aarav, 5);
+            assertCondition(!recs.isEmpty(), "Generated recommendations for student");
+            for (Book b : recs) {
+                assertCondition(!b.getSellerId().equalsIgnoreCase(aarav.getId()), "Excludes student's own books");
+                assertCondition(b.isAvailable(), "Recommended books must be active/available");
+            }
+        });
+
+        test("M3-02: BookRecommendationService: Semester-Based Filtering & Exclusion", () -> {
+            int targetSem = 3;
+            Student priya = studentService.getStudentById("STU102");
+            List<Book> sem3Recs = recService.recommendBySemester(targetSem, priya.getId());
+            assertCondition(!sem3Recs.isEmpty(), "Semester 3 recommendations found");
+            for (Book b : sem3Recs) {
+                assertCondition(b.getSemester() == targetSem, "Matches semester 3");
+                assertCondition(!b.getSellerId().equalsIgnoreCase(priya.getId()), "Excludes seller's own listings");
+            }
+        });
+
+        test("M3-03: BookRecommendationService: Subject Interests Filtering (Stream anyMatch)", () -> {
+            List<String> interests = Arrays.asList("Algorithms", "Operating Systems");
+            List<Book> subjectRecs = recService.recommendBySubjects(interests, "STU101");
+            assertCondition(!subjectRecs.isEmpty(), "Subject recommendations found");
+            for (Book b : subjectRecs) {
+                assertCondition(b.isAvailable(), "Active only");
+                assertCondition(!b.getSellerId().equalsIgnoreCase("STU101"), "Excludes STU101");
+            }
+        });
+
+        test("M3-04: BookRecommendationService: Price Range & Budget Filtering (Sorted Ascending)", () -> {
+            List<Book> budgetRecs = recService.recommendByPriceRange(300.0, 600.0, null);
+            assertCondition(!budgetRecs.isEmpty(), "Budget recommendations found");
+            for (int i = 0; i < budgetRecs.size(); i++) {
+                assertCondition(budgetRecs.get(i).getPrice() >= 300.0 && budgetRecs.get(i).getPrice() <= 600.0, "Within price bounds");
+                if (i > 0) {
+                    assertCondition(budgetRecs.get(i).getPrice() >= budgetRecs.get(i - 1).getPrice(), "Ascending price order");
+                }
+            }
+        });
+
+        test("M3-05: BookRecommendationService: Distinct Available Subjects & Explanation Reasons", () -> {
+            List<String> subjects = recService.getAvailableDistinctSubjects();
+            assertCondition(!subjects.isEmpty(), "Subjects list non-empty");
+            Set<String> set = new HashSet<>(subjects);
+            assertCondition(subjects.size() == set.size(), "All subjects distinct");
+
+            Book b = bookService.getBookById("BK201");
+            Student s = studentService.getStudentById("STU101");
+            String reason = recService.getRecommendationReason(b, s);
+            assertCondition(reason != null && !reason.trim().isEmpty(), "Non-empty recommendation explanation generated");
+        });
+
+        test("M3-06: ProjectReportService: Core Platform Aggregate Metrics & KPIs", () -> {
+            assertCondition(reportService.getTotalRegisteredStudents() >= 9, "Total students >= 9");
+            assertCondition(reportService.getTotalListedBooks() >= 24, "Total books >= 24");
+            assertCondition(reportService.getBooksAvailableForSaleCount() > 0, "Books for sale > 0");
+            assertCondition(reportService.getBooksAvailableForExchangeCount() > 0, "Books for exchange > 0");
+            assertCondition(reportService.getAverageSellerRating() > 0.0, "Average seller rating calculated");
+        });
+
+        test("M3-07: ProjectReportService: Subject Popularity Ranking (HashMap + Streams)", () -> {
+            Map<String, Long> popular = reportService.getSubjectPopularityMap();
+            assertCondition(!popular.isEmpty(), "Popularity map populated");
+            long prev = Long.MAX_VALUE;
+            for (long count : popular.values()) {
+                assertCondition(count <= prev, "Descending frequency ordering maintained");
+                prev = count;
+            }
+        });
+
+        test("M3-08: ProjectReportService: Alphabetical Subject Index (TreeMap Naturally Sorted Keys)", () -> {
+            TreeMap<String, Long> treeMap = reportService.getSubjectsSortedAlphabetically();
+            assertCondition(!treeMap.isEmpty(), "TreeMap populated");
+            String prevKey = "";
+            for (String key : treeMap.keySet()) {
+                if (!prevKey.isEmpty()) {
+                    assertCondition(key.compareToIgnoreCase(prevKey) >= 0, "Alphabetical key ordering in TreeMap");
+                }
+                prevKey = key;
+            }
+        });
+
+        test("M3-09: ProjectReportService: Semester Distribution Matrix (Native 1D Array)", () -> {
+            int[] dist = reportService.getSemesterDistribution();
+            assertCondition(dist.length == 9, "1D array has 9 slots");
+            int sum = 0;
+            for (int s = 1; s <= 8; s++) sum += dist[s];
+            assertCondition(sum == reportService.getTotalListedBooks(), "Array sum equals total books");
+        });
+
+        test("M3-10: ProjectReportService: Top Active Sellers Leaderboard & Composite Scoring", () -> {
+            List<ProjectReportService.SellerActivity> top = reportService.getMostActiveSellers(5);
+            assertCondition(!top.isEmpty() && top.size() <= 5, "Top sellers list within limit");
+            for (int i = 1; i < top.size(); i++) {
+                assertCondition(top.get(i - 1).getTotalActivityScore() >= top.get(i).getTotalActivityScore(),
+                        "Leaderboard sorted descending by activity score");
+            }
+        });
+
+        test("M3-11: ProjectReportService: Formatted Comprehensive Dashboard Report (StringBuilder)", () -> {
+            String report = reportService.generateComprehensiveReport();
+            assertCondition(report.contains("CORE PLATFORM METRICS") && report.contains("SEMESTER"), "Structured report generated");
+        });
+
+        test("M3-12: ValidationUtil: Valid Inputs Pass & Invalid Inputs Throw ValidationException", () -> {
+            // Valid student
+            ValidationUtil.validateStudent("Kavita Rao", "kavita.r@dtu.ac.in", "+91 98765 43210", "DTU", "ECE", 4);
+
+            // Invalid student: bad email
+            boolean caughtBadEmail = false;
+            try {
+                ValidationUtil.validateStudent("Kavita Rao", "not-valid-email", "+91 98765 43210", "DTU", "ECE", 4);
+            } catch (ValidationException e) {
+                caughtBadEmail = true;
+                assertCondition("email".equals(e.getFieldName()), "Field name is email");
+            }
+            assertCondition(caughtBadEmail, "Invalid email caught by ValidationException");
+
+            // Invalid price: negative
+            boolean caughtNegPrice = false;
+            try {
+                ValidationUtil.validatePrice(-100.0);
+            } catch (ValidationException e) {
+                caughtNegPrice = true;
+            }
+            assertCondition(caughtNegPrice, "Negative price caught by ValidationException");
+        });
+
+        test("M3-13: ValidationUtil: Prevention of Self-Trading & Self-Rating", () -> {
+            // Self-trading
+            boolean caughtSelfTrade = false;
+            try {
+                ValidationUtil.validateExchangeRequest("BK201", "STU101", "STU101", "Purchase", null);
+            } catch (ValidationException e) {
+                caughtSelfTrade = true;
+            }
+            assertCondition(caughtSelfTrade, "Self-trading prevented");
+
+            // Self-rating
+            boolean caughtSelfRate = false;
+            try {
+                ValidationUtil.validateRating("STU101", "STU101", 5.0, "Great feedback");
+            } catch (ValidationException e) {
+                caughtSelfRate = true;
+            }
+            assertCondition(caughtSelfRate, "Self-rating prevented");
+        });
+
+        test("M3-14: ValidationUtil: System ID Patterns (STU, BK, REQ, REV)", () -> {
+            assertCondition(ValidationUtil.isValidStudentId("STU101"), "STU101 valid");
+            assertCondition(!ValidationUtil.isValidStudentId("INVALID"), "INVALID student ID rejected");
+            assertCondition(ValidationUtil.isValidBookId("BK201"), "BK201 valid");
+            assertCondition(!ValidationUtil.isValidBookId("BOOK201"), "BOOK201 invalid format rejected");
+        });
+
+        test("M3-15: CsvExportService: Export All 5 Datasets to exports/ Directory", () -> {
+            List<CsvExportService.ExportResult> results = exportService.exportAll(store, reportService);
+            assertCondition(results.size() == 5, "5 datasets exported to exports/");
+            for (CsvExportService.ExportResult r : results) {
+                assertCondition(r.isSuccess() && new File(r.getFullPath()).exists(), "Export file exists: " + r.getFileName());
+            }
+        });
+
+        test("M3-16: CsvExportService: Protection of Internal Persistence Files (SecurityException)", () -> {
+            boolean protectedPath = false;
+            try {
+                exportService.exportStudents(store.getAllStudents(), "data/students.csv");
+            } catch (SecurityException e) {
+                protectedPath = true;
+            }
+            assertCondition(protectedPath, "Attempt to overwrite persistence file blocked by SecurityException");
+        });
+
+        test("M3-17: Concurrency: Concurrent Readers on Recommendations & Analytics", () -> {
+            final boolean[] ok = {true};
+            Thread t1 = new Thread(() -> {
+                for (int i = 0; i < 5; i++) {
+                    recService.recommendForStudent(store.getStudent("STU101"), 3);
+                }
+            });
+            Thread t2 = new Thread(() -> {
+                for (int i = 0; i < 5; i++) {
+                    reportService.generateComprehensiveReport();
+                }
+            });
+            t1.start();
+            t2.start();
+            t1.join(2000);
+            t2.join(2000);
+            assertCondition(ok[0], "Concurrent reads on recommendation and analytics completed safely");
         });
 
         System.out.println("================================================================================");

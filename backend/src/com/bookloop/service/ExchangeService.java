@@ -2,6 +2,7 @@ package com.bookloop.service;
 
 import com.bookloop.data.DataStore;
 import com.bookloop.model.*;
+import com.bookloop.util.ValidationUtil;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +25,9 @@ public class ExchangeService {
      */
     public ExchangeRequest createRequest(String bookId, Student requester, String requestType,
                                          String offeredBookId, String notes) {
+        if (requester == null) {
+            throw new IllegalArgumentException("Requester must be a valid registered student.");
+        }
         Book book = store.getBook(bookId);
         if (book == null) {
             throw new IllegalArgumentException("The requested book does not exist: " + bookId);
@@ -31,9 +35,9 @@ public class ExchangeService {
         if (!book.isAvailable()) {
             throw new IllegalStateException("Book is currently unavailable for requests: " + book.getStatus());
         }
-        if (book.getSellerId().equalsIgnoreCase(requester.getId())) {
-            throw new IllegalArgumentException("You cannot send an exchange/purchase request for your own listed book.");
-        }
+
+        // Validate request parameters and ensure no self-trading
+        ValidationUtil.validateExchangeRequest(bookId, book.getSellerId(), requester.getId(), requestType, offeredBookId);
 
         String offeredTitle = "";
         if ("Exchange".equalsIgnoreCase(requestType) && offeredBookId != null && !offeredBookId.trim().isEmpty()) {

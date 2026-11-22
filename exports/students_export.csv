@@ -1,0 +1,10 @@
+Student_ID,Full_Name,College_Email,Phone,Joined_Date,College,Department,Semester,Rating,Review_Count,Books_Sold,Books_Exchanged
+STU102,Priya Patel,priya.patel@bits.ac.in,+91 98123 45678,2025-09-01,BITS Pilani,Information Technology,4,4.80,15,9,5
+STU101,Aarav Sharma,aarav.sharma@dtu.ac.in,+91 98765 43210,2025-08-15,Delhi Technological University (DTU),Computer Science and Engineering,5,4.90,20,12,6
+STU104,Ananya Iyer,ananya.iyer@vit.ac.in,+91 97654 32109,2025-10-10,VIT Vellore,Data Science & Artificial Intelligence,3,5.00,17,11,5
+STU103,Rohan Verma,rohan.v@iitb.ac.in,+91 98345 67890,2025-07-20,IIT Bombay,Electrical Engineering,6,4.70,12,8,3
+STU106,Sneha Reddy,sneha.reddy@iiit.ac.in,+91 97112 34567,2025-09-15,IIIT Hyderabad,Computer Science and Engineering,4,4.90,12,7,5
+STU105,Vikram Malhotra,vikram.m@nitt.edu,+91 98901 23456,2025-08-28,NIT Trichy,Electronics & Communication Engineering,5,4.60,8,6,4
+STU108,Meera Nair,meera.nair@manipal.edu,+91 98456 78901,2025-10-02,Manipal Institute of Technology,Biotechnology,3,4.80,10,8,3
+STU107,Devansh Gupta,devansh.g@nsut.ac.in,+91 98223 45678,2025-08-05,Netaji Subhas University of Technology (NSUT),Mechanical Engineering,6,4.50,9,5,2
+STU109,Kabir Mehta,kabir.mehta@thapar.edu,+91 98778 89900,2025-09-22,Thapar Institute of Engineering and Technology,Civil Engineering,5,4.40,7,4,2

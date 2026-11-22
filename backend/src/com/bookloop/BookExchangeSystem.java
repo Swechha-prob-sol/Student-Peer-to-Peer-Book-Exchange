@@ -4,29 +4,30 @@ import com.bookloop.data.DataStore;
 import com.bookloop.data.DummyData;
 import com.bookloop.exception.*;
 import com.bookloop.model.*;
+import com.bookloop.persistence.CsvExportService;
 import com.bookloop.persistence.FileStorageManager;
 import com.bookloop.service.*;
 import com.bookloop.threading.*;
 import com.bookloop.util.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Main Entry Point: BookLoop - Student Peer-to-Peer Book Exchange Platform.
  * Menu-driven Java console application demonstrating:
  * - Clean separation of UI (menus), Business Logic (Services), and Data (DataStore/DummyData)
  * - Dynamic student context switching (defaults to Aarav Sharma, DTU)
- * - Comprehensive implementation of all Milestone 1 and Milestone 2 requirements
+ * - Comprehensive implementation of all Milestone 1, 2, and 3 requirements
  * - Robust input validation and user-friendly error recovery
  *
- * Milestone 2 Additions:
- * - Strings, Arrays, Wrapper Classes (StringUtils, multidimensional arrays)
- * - Exception Handling (custom exceptions, try-catch-finally, multi-catch, throw/throws)
- * - Multithreading & Concurrency (Producer-Consumer, synchronized, daemon threads)
- * - Lambda Expressions & Stream API (StreamService)
- * - Generics (GenericCollectionUtils, GenericPair)
- * - File Handling & Persistence (FileStorageManager, CSV import/export)
+ * Milestone 3 Additions:
+ * - Book Recommendation Engine (BookRecommendationService: semester, subjects, price, non-self)
+ * - Project Analytics & Executive Reports (ProjectReportService: HashMap, TreeMap, native arrays, String/StringBuilder)
+ * - Data Validation Utility (ValidationUtil: student, book, request, rating, custom ValidationException)
+ * - CSV Export Service (CsvExportService: separate exports/ folder, no overwrite of persistence files)
  */
 public class BookExchangeSystem {
 
@@ -36,6 +37,9 @@ public class BookExchangeSystem {
     private final ExchangeService exchangeService;
     private final RatingService ratingService;
     private final StreamService streamService;
+    private final BookRecommendationService recommendationService;
+    private final ProjectReportService projectReportService;
+    private final CsvExportService csvExportService;
     private final Scanner scanner;
     private AutoSaveManager autoSaveManager;
 
@@ -49,6 +53,9 @@ public class BookExchangeSystem {
         this.exchangeService = new ExchangeService(dataStore);
         this.ratingService = new RatingService(dataStore);
         this.streamService = new StreamService(dataStore);
+        this.recommendationService = new BookRecommendationService(dataStore);
+        this.projectReportService = new ProjectReportService(dataStore);
+        this.csvExportService = new CsvExportService();
         this.scanner = new Scanner(System.in);
 
         // Initialize data: loads from files if available, otherwise dummy data
@@ -73,7 +80,7 @@ public class BookExchangeSystem {
         boolean running = true;
         while (running) {
             printMainMenu();
-            int choice = readIntChoice("Enter your choice (1-21): ", 1, 21);
+            int choice = readIntChoice("Enter your choice (1-26): ", 1, 26);
 
             try {
                 switch (choice) {
@@ -138,6 +145,21 @@ public class BookExchangeSystem {
                         handleSaveData();
                         break;
                     case 21:
+                        handleBookRecommendations();
+                        break;
+                    case 22:
+                        handleProjectAnalytics();
+                        break;
+                    case 23:
+                        handleDataValidationDemos();
+                        break;
+                    case 24:
+                        handleCsvExports();
+                        break;
+                    case 25:
+                        handleSaveData();
+                        break;
+                    case 26:
                         handleSaveData();
                         if (autoSaveManager != null) autoSaveManager.shutdown();
                         running = false;
@@ -145,6 +167,12 @@ public class BookExchangeSystem {
                         break;
                     default:
                         System.out.println("Invalid selection. Please choose an option from the menu.");
+                }
+            } catch (ValidationException e) {
+                // Demonstrates catching custom validation exception
+                System.out.println("\n[VALIDATION ERROR] " + e.getMessage());
+                if (e.getFieldName() != null) {
+                    System.out.println("  Field: '" + e.getFieldName() + "' | Value: \"" + e.getInvalidValue() + "\"");
                 }
             } catch (BookNotFoundException e) {
                 // Demonstrates catching custom checked exception
@@ -185,7 +213,7 @@ public class BookExchangeSystem {
         System.out.println("  |____/ \\____/ \\____/|_|\\_\\_____\\____/ \\____/|_|     ");
         System.out.println("       STUDENT PEER-TO-PEER ACADEMIC BOOK EXCHANGE (CORE JAVA)");
         System.out.println("              Read More. Spend Less. Exchange Smarter.");
-        System.out.println("         Milestone 2: Advanced Java + Multithreading + File I/O");
+        System.out.println("  Milestone 3: Recommendations + Analytics + Validation + CSV Export");
         System.out.println("================================================================================");
     }
 
@@ -219,7 +247,13 @@ public class BookExchangeSystem {
         System.out.println(" 18. File Operations (Import/Export, StreamTokenizer)");
         System.out.println(" 19. Exception Handling Demonstration");
         System.out.println(" 20. Save All Data to Files");
-        System.out.println(" 21. Save & Exit");
+        System.out.println("  === MILESTONE 3 FEATURES ===");
+        System.out.println(" 21. Book Recommendation Engine (Smart, Semester, Subject, Budget)");
+        System.out.println(" 22. Platform Analytics & Executive Reports (KPIs, Subjects, Leaderboard)");
+        System.out.println(" 23. Data Validation Utility & Rule Verification (ValidationUtil)");
+        System.out.println(" 24. Export System Reports to CSV (Decoupled exports/ Directory)");
+        System.out.println(" 25. Save All Data to Files");
+        System.out.println(" 26. Save & Exit");
         System.out.println("--------------------------------------------------------------------------------");
     }
 
@@ -1362,6 +1396,383 @@ public class BookExchangeSystem {
             } catch (NumberFormatException e) {
                 System.out.println("Invalid number format. Please try again.");
             }
+        }
+    }
+
+    // ==========================================
+    // MILESTONE 3: Feature 1 - Book Recommendation Engine
+    // ==========================================
+
+    private void handleBookRecommendations() {
+        System.out.println("\n=== MILESTONE 3: BOOK RECOMMENDATION ENGINE ===");
+        System.out.println(" 1. Smart Recommendations for Active Student (" +
+                (currentStudent != null ? currentStudent.getName() : "None") + ")");
+        System.out.println(" 2. Recommend by Academic Semester (Curriculum Level)");
+        System.out.println(" 3. Recommend by Subject(s) of Interest");
+        System.out.println(" 4. Recommend within Price / Budget Range");
+        System.out.println(" 5. Custom Multi-Criteria Personalized Search");
+        System.out.println(" 6. View Distinct Available Subjects");
+        System.out.println(" 7. Back to Main Menu");
+
+        int opt = readIntChoice("Choose recommendation mode (1-7): ", 1, 7);
+        switch (opt) {
+            case 1: {
+                if (currentStudent == null) {
+                    System.out.println("[INFO] No student active. Showing top platform recommendations:");
+                } else {
+                    System.out.printf("[ANALYSIS] Matching curriculum books for %s (%s, %s, Sem %d)...%n",
+                            currentStudent.getName(), currentStudent.getCollege(),
+                            currentStudent.getDepartment(), currentStudent.getSemester());
+                }
+                List<Book> recs = recommendationService.recommendForStudent(currentStudent, 6);
+                displayRecommendations("Smart Personalized Recommendations", recs, currentStudent);
+                break;
+            }
+            case 2: {
+                int sem = readIntChoice("Enter Semester to target (1-8): ", 1, 8);
+                String excludeId = (currentStudent != null) ? currentStudent.getId() : null;
+                List<Book> recs = recommendationService.recommendBySemester(sem, excludeId);
+                displayRecommendations("Curriculum Recommendations for Semester " + sem, recs, currentStudent);
+                break;
+            }
+            case 3: {
+                System.out.print("Enter subject(s) of interest (comma-separated, e.g., 'Algorithms, OS'): ");
+                String input = scanner.nextLine().trim();
+                List<String> subjects = Arrays.stream(input.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.toList());
+                String excludeId = (currentStudent != null) ? currentStudent.getId() : null;
+                List<Book> recs = recommendationService.recommendBySubjects(subjects, excludeId);
+                displayRecommendations("Recommendations for Subject(s): " + input, recs, currentStudent);
+                break;
+            }
+            case 4: {
+                double minPrice = readDouble("Enter Minimum Price in Rs.: ", 0.0, 50000.0);
+                double maxPrice = readDouble("Enter Maximum Price in Rs.: ", minPrice, 50000.0);
+                String excludeId = (currentStudent != null) ? currentStudent.getId() : null;
+                List<Book> recs = recommendationService.recommendByPriceRange(minPrice, maxPrice, excludeId);
+                displayRecommendations(String.format("Budget Recommendations (Rs. %.0f - Rs. %.0f)", minPrice, maxPrice), recs, currentStudent);
+                break;
+            }
+            case 5: {
+                System.out.printf("Custom Multi-Criteria Search for: %s%n",
+                        currentStudent != null ? currentStudent.getName() : "General User");
+                double maxPrice = readDouble("Enter Max Budget in Rs.: ", 0.0, 50000.0);
+                System.out.print("Enter specific subject keyword (or press Enter for any): ");
+                String subjKw = scanner.nextLine().trim();
+                List<String> subList = subjKw.isEmpty() ? null : Collections.singletonList(subjKw);
+                List<Book> recs = recommendationService.recommendPersonalized(currentStudent, maxPrice, subList, 6);
+                displayRecommendations("Custom Personalized Recommendations", recs, currentStudent);
+                break;
+            }
+            case 6: {
+                List<String> distinctSubjects = recommendationService.getAvailableDistinctSubjects();
+                System.out.println("\n--- DISTINCT AVAILABLE SUBJECTS IN ACTIVE CATALOG (Stream distinct) ---");
+                for (int i = 0; i < distinctSubjects.size(); i++) {
+                    System.out.printf("  %2d. %s%n", (i + 1), distinctSubjects.get(i));
+                }
+                break;
+            }
+            case 7:
+            default:
+                break;
+        }
+    }
+
+    private void displayRecommendations(String title, List<Book> books, Student student) {
+        System.out.println("\n------------------------------------------------------------------------------------------------------------------");
+        System.out.printf("  %s (%d books found)%n", title, books.size());
+        System.out.println("------------------------------------------------------------------------------------------------------------------");
+        if (books.isEmpty()) {
+            System.out.println("  No matching recommendations found for the selected criteria.");
+            return;
+        }
+        System.out.printf("  %-7s | %-30s | %-18s | %-6s | %-7s | %-14s | %-10s%n",
+                "ID", "Title", "Author", "Sem", "Price", "Seller Rep", "Condition");
+        System.out.println("  --------+--------------------------------+--------------------+--------+---------+----------------+-----------");
+        for (Book b : books) {
+            System.out.printf("  %-7s | %-30s | %-18s | Sem %-2d | Rs.%-4.0f | %4.1fâ˜… (%-5s) | %-10s%n",
+                    b.getId(),
+                    truncate(b.getTitle(), 30),
+                    truncate(b.getAuthor(), 18),
+                    b.getSemester(),
+                    b.getPrice(),
+                    b.getSellerRating(),
+                    truncate(b.getSellerName(), 5),
+                    b.getCondition().getDisplayName());
+            String reason = recommendationService.getRecommendationReason(b, student);
+            System.out.println("          â†³ Why recommended: " + reason);
+        }
+        System.out.println("------------------------------------------------------------------------------------------------------------------");
+    }
+
+    // ==========================================
+    // MILESTONE 3: Feature 2 - Project Analytics & Reports
+    // ==========================================
+
+    private void handleProjectAnalytics() {
+        System.out.println("\n=== MILESTONE 3: PROJECT ANALYTICS & EXECUTIVE REPORTS ===");
+        System.out.println(" 1. Comprehensive Platform Analytics Dashboard (KPIs, Lifecycle, Matrix, Leaderboard)");
+        System.out.println(" 2. Subject Popularity Breakdown (Frequency Count & Ranking)");
+        System.out.println(" 3. Alphabetical Subject Index (TreeMap Naturally Sorted Keys)");
+        System.out.println(" 4. Semester Distribution Matrix (Native 1D Array Analysis)");
+        System.out.println(" 5. Most Active Student Sellers Leaderboard");
+        System.out.println(" 6. Campus & University Participation Network (Student Counts)");
+        System.out.println(" 7. Back to Main Menu");
+
+        int choice = readIntChoice("Choose report view (1-7): ", 1, 7);
+        switch (choice) {
+            case 1:
+                System.out.println(projectReportService.generateComprehensiveReport());
+                break;
+            case 2: {
+                System.out.println("\n--- SUBJECT POPULARITY RANKING (HashMap + Stream grouping & sorting) ---");
+                System.out.printf("  %-4s | %-36s | %-12s%n", "Rank", "Subject Name", "Total Books");
+                System.out.println("  -----+--------------------------------------+-------------");
+                Map<String, Long> popular = projectReportService.getSubjectPopularityMap();
+                int r = 1;
+                for (Map.Entry<String, Long> e : popular.entrySet()) {
+                    System.out.printf("  #%-3d | %-36s | %-12d%n", r++, e.getKey(), e.getValue());
+                }
+                break;
+            }
+            case 3: {
+                System.out.println("\n--- SUBJECTS SORTED ALPHABETICALLY (TreeMap Naturally Sorted Keys) ---");
+                TreeMap<String, Long> sortedSubjects = projectReportService.getSubjectsSortedAlphabetically();
+                for (Map.Entry<String, Long> e : sortedSubjects.entrySet()) {
+                    System.out.printf("  - %-36s : %2d book(s)%n", e.getKey(), e.getValue());
+                }
+                break;
+            }
+            case 4: {
+                System.out.println("\n--- TEXTBOOK DISTRIBUTION ACROSS SEMESTERS (Native 1D Array) ---");
+                int[] dist = projectReportService.getSemesterDistribution();
+                for (int sem = 1; sem <= 8; sem++) {
+                    System.out.printf("  Semester %d: %2d books%n", sem, dist[sem]);
+                }
+                break;
+            }
+            case 5: {
+                System.out.println("\n--- TOP ACTIVE STUDENT SELLERS LEADERBOARD ---");
+                System.out.printf("  %-4s | %-18s | %-22s | %-6s | %-7s | %-6s | %-6s | %-8s%n",
+                        "Rank", "Student Name", "College", "Rating", "Listed", "Sold", "Swapped", "Score");
+                System.out.println("  -----+--------------------+------------------------+--------+---------+--------+--------+---------");
+                List<ProjectReportService.SellerActivity> top = projectReportService.getMostActiveSellers(10);
+                int rank = 1;
+                for (ProjectReportService.SellerActivity sa : top) {
+                    System.out.printf("  #%-3d | %-18s | %-22s | %4.1fâ˜…  | %-7d | %-6d | %-6d | %-8d%n",
+                            rank++,
+                            sa.getStudent().getName(),
+                            truncate(sa.getStudent().getCollege(), 22),
+                            sa.getRating(),
+                            sa.getBooksListed(),
+                            sa.getBooksSold(),
+                            sa.getBooksExchanged(),
+                            sa.getTotalActivityScore());
+                }
+                break;
+            }
+            case 6: {
+                System.out.println("\n--- CAMPUS PARTICIPATION BY UNIVERSITY (HashMap Aggregation) ---");
+                Map<String, Integer> campuses = projectReportService.getCollegeParticipationMap();
+                for (Map.Entry<String, Integer> e : campuses.entrySet()) {
+                    System.out.printf("  - %-42s : %2d student(s)%n", e.getKey(), e.getValue());
+                }
+                break;
+            }
+            case 7:
+            default:
+                break;
+        }
+    }
+
+    // ==========================================
+    // MILESTONE 3: Feature 3 - Data Validation Utility
+    // ==========================================
+
+    private void handleDataValidationDemos() {
+        System.out.println("\n=== MILESTONE 3: DATA VALIDATION UTILITY (ValidationUtil) ===");
+        System.out.println(" 1. Interactive Student Registration Validator (name, email, phone, semester)");
+        System.out.println(" 2. Interactive Book Listing Validator (title, author, price, listing type)");
+        System.out.println(" 3. Interactive Exchange Request Validator (self-trade check, book existence)");
+        System.out.println(" 4. Interactive Peer Rating Validator (self-rating prevention, 1.0-5.0 scale)");
+        System.out.println(" 5. System ID Format Validator (STU, BK, REQ, REV patterns)");
+        System.out.println(" 6. Back to Main Menu");
+
+        int choice = readIntChoice("Choose validation test (1-6): ", 1, 6);
+        switch (choice) {
+            case 1: {
+                System.out.println("\n--- Student Details Validation Test ---");
+                System.out.print("Enter name to test: ");
+                String name = scanner.nextLine();
+                System.out.print("Enter email to test: ");
+                String email = scanner.nextLine();
+                System.out.print("Enter phone to test: ");
+                String phone = scanner.nextLine();
+                System.out.print("Enter semester to test (1-8): ");
+                String semStr = scanner.nextLine();
+                try {
+                    int sem = ValidationUtil.validateAndParseSemester(semStr);
+                    ValidationUtil.validateStudent(name, email, phone, "Test College", "CSE", sem);
+                    System.out.println("[SUCCESS] All student registration fields PASSED validation!");
+                } catch (ValidationException e) {
+                    System.out.println("\n[VALIDATION REJECTED] " + e.getMessage());
+                    System.out.println(e.getDiagnosticSummary());
+                }
+                break;
+            }
+            case 2: {
+                System.out.println("\n--- Book Listing Validation Test ---");
+                System.out.print("Enter title to test: ");
+                String title = scanner.nextLine();
+                System.out.print("Enter author to test: ");
+                String author = scanner.nextLine();
+                System.out.print("Enter price in Rs.: ");
+                String priceStr = scanner.nextLine();
+                try {
+                    double price = ValidationUtil.validateAndParsePrice(priceStr);
+                    ValidationUtil.validateBook(title, author, "", "Computer Science", 3, price, ListingType.FOR_SALE);
+                    System.out.println("[SUCCESS] All book listing fields PASSED validation!");
+                } catch (ValidationException e) {
+                    System.out.println("\n[VALIDATION REJECTED] " + e.getMessage());
+                    System.out.println(e.getDiagnosticSummary());
+                }
+                break;
+            }
+            case 3: {
+                System.out.println("\n--- Exchange Request Validation Test ---");
+                System.out.print("Enter Requested Book ID (e.g. BK201): ");
+                String bookId = scanner.nextLine().trim();
+                System.out.print("Enter Seller Student ID (e.g. STU102): ");
+                String sellerId = scanner.nextLine().trim();
+                System.out.print("Enter Requester Student ID (e.g. STU101): ");
+                String requesterId = scanner.nextLine().trim();
+                System.out.print("Enter Request Type ('Purchase' or 'Exchange'): ");
+                String type = scanner.nextLine().trim();
+                String offeredId = null;
+                if ("exchange".equalsIgnoreCase(type)) {
+                    System.out.print("Enter Offered Book ID: ");
+                    offeredId = scanner.nextLine().trim();
+                }
+                try {
+                    ValidationUtil.validateExchangeRequest(bookId, sellerId, requesterId, type, offeredId);
+                    System.out.println("[SUCCESS] Exchange request PASSED validation! No self-trade and valid arguments.");
+                } catch (ValidationException e) {
+                    System.out.println("\n[VALIDATION REJECTED] " + e.getMessage());
+                    System.out.println(e.getDiagnosticSummary());
+                }
+                break;
+            }
+            case 4: {
+                System.out.println("\n--- Peer Rating Validation Test ---");
+                System.out.print("Enter Seller Student ID: ");
+                String sellerId = scanner.nextLine().trim();
+                System.out.print("Enter Reviewer Student ID: ");
+                String reviewerId = scanner.nextLine().trim();
+                System.out.print("Enter Rating Score (1.0 to 5.0): ");
+                String scoreStr = scanner.nextLine().trim();
+                System.out.print("Enter Review Comment: ");
+                String comment = scanner.nextLine().trim();
+                try {
+                    double score = ValidationUtil.validateAndParseRatingScore(scoreStr);
+                    ValidationUtil.validateRating(sellerId, reviewerId, score, comment);
+                    System.out.println("[SUCCESS] Peer rating PASSED validation!");
+                } catch (ValidationException e) {
+                    System.out.println("\n[VALIDATION REJECTED] " + e.getMessage());
+                    System.out.println(e.getDiagnosticSummary());
+                }
+                break;
+            }
+            case 5: {
+                System.out.println("\n--- System ID Pattern Validation Test ---");
+                System.out.print("Enter an ID to validate (e.g., STU101, BK205, REQ301, REV401): ");
+                String id = scanner.nextLine().trim();
+                if (id.startsWith("STU")) {
+                    boolean valid = ValidationUtil.isValidStudentId(id);
+                    System.out.println("Evaluated as Student ID: " + (valid ? "VALID" : "INVALID"));
+                } else if (id.startsWith("BK")) {
+                    boolean valid = ValidationUtil.isValidBookId(id);
+                    System.out.println("Evaluated as Book ID: " + (valid ? "VALID" : "INVALID"));
+                } else {
+                    System.out.println("Unknown ID prefix. Expected prefix 'STU' or 'BK'.");
+                }
+                break;
+            }
+            case 6:
+            default:
+                break;
+        }
+    }
+
+    // ==========================================
+    // MILESTONE 3: Feature 4 - CSV Export Functionality
+    // ==========================================
+
+    private void handleCsvExports() {
+        System.out.println("\n=== MILESTONE 3: CSV EXPORT FUNCTIONALITY (CsvExportService) ===");
+        System.out.println("NOTE: All export files are safely saved in the separate 'exports/' directory.");
+        System.out.println("      Internal application persistence files in 'data/' are NEVER overwritten.");
+        System.out.println("--------------------------------------------------------------------------------");
+        System.out.println(" 1. Export All 5 Datasets to CSV (Students, Books, Requests, Ratings, Analytics)");
+        System.out.println(" 2. Export Student Directory (exports/students_export.csv)");
+        System.out.println(" 3. Export Book Listings Catalog (exports/books_export.csv)");
+        System.out.println(" 4. Export Exchange Transaction History (exports/requests_export.csv)");
+        System.out.println(" 5. Export Seller Ratings & Reviews (exports/ratings_export.csv)");
+        System.out.println(" 6. Export Analytics & Executive Summary (exports/analytics_summary_export.csv)");
+        System.out.println(" 7. Back to Main Menu");
+
+        int choice = readIntChoice("Choose export option (1-7): ", 1, 7);
+        try {
+            switch (choice) {
+                case 1: {
+                    System.out.println("\nExporting all datasets to exports/ directory...");
+                    List<CsvExportService.ExportResult> results = csvExportService.exportAll(dataStore, projectReportService);
+                    System.out.println("\n--- BATCH EXPORT SUMMARY ---");
+                    for (CsvExportService.ExportResult res : results) {
+                        System.out.println("  " + res);
+                    }
+                    System.out.println("\n[SUCCESS] All 5 CSV datasets successfully exported to exports/ directory.");
+                    break;
+                }
+                case 2: {
+                    String path = CsvExportService.DEFAULT_EXPORT_DIR + File.separator + "students_export.csv";
+                    CsvExportService.ExportResult res = csvExportService.exportStudents(studentService.getAllStudents(), path);
+                    System.out.println("\n[SUCCESS] " + res);
+                    break;
+                }
+                case 3: {
+                    String path = CsvExportService.DEFAULT_EXPORT_DIR + File.separator + "books_export.csv";
+                    CsvExportService.ExportResult res = csvExportService.exportBooks(bookService.getAllBooks(), path);
+                    System.out.println("\n[SUCCESS] " + res);
+                    break;
+                }
+                case 4: {
+                    String path = CsvExportService.DEFAULT_EXPORT_DIR + File.separator + "requests_export.csv";
+                    CsvExportService.ExportResult res = csvExportService.exportRequests(exchangeService.getAllRequests(), path);
+                    System.out.println("\n[SUCCESS] " + res);
+                    break;
+                }
+                case 5: {
+                    String path = CsvExportService.DEFAULT_EXPORT_DIR + File.separator + "ratings_export.csv";
+                    CsvExportService.ExportResult res = csvExportService.exportRatings(ratingService.getAllReviews(), path);
+                    System.out.println("\n[SUCCESS] " + res);
+                    break;
+                }
+                case 6: {
+                    String path = CsvExportService.DEFAULT_EXPORT_DIR + File.separator + "analytics_summary_export.csv";
+                    CsvExportService.ExportResult res = csvExportService.exportAnalyticsReport(projectReportService, path);
+                    System.out.println("\n[SUCCESS] " + res);
+                    break;
+                }
+                case 7:
+                default:
+                    break;
+            }
+        } catch (IOException e) {
+            System.out.println("\n[ERROR] File export I/O failure: " + e.getMessage());
+        } catch (SecurityException e) {
+            System.out.println("\n[SECURITY ERROR] " + e.getMessage());
         }
     }
 
