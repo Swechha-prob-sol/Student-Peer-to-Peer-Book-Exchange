@@ -1,0 +1,7 @@
+id,bookId,bookTitle,bookPrice,sellerId,sellerName,requesterId,requesterName,requestType,offeredBookId,offeredBookTitle,requestDate,status,trackingStep,notes
+REQ306,BK203,Operating System Concepts (Dinosaur Book),380.0,STU104,Ananya Iyer,STU101,Aarav Sharma,Exchange,BK214,Theory of Computation by Sipser,2026-10-31,COMPLETED,5,Book handed over at campus canteen. Exchanged successfully!
+REQ305,BK207,Higher Engineering Mathematics,350.0,STU103,Rohan Verma,STU107,Devansh Gupta,Purchase,,,2026-11-03,REJECTED,1,Offered lower price which was declined by seller.
+REQ304,BK201,Introduction to Algorithms (CLRS),650.0,STU102,Priya Patel,STU106,Sneha Reddy,Exchange,BK209,Compilers (Dragon Book),2026-11-05,ACCEPTED,2,Happy to swap my Dragon Book for your CLRS algorithm book.
+REQ303,BK220,Design Patterns: Elements of Reusable Object-Oriented Software,540.0,STU101,Aarav Sharma,STU105,Vikram Malhotra,Purchase,,,2026-11-08,COMPLETED,4,Looking to prepare for software engineering campus placement interviews.
+REQ302,BK210,Java: The Complete Reference,520.0,STU101,Aarav Sharma,STU103,Rohan Verma,Purchase,,,2026-11-10,ACCEPTED,3,Need this for our 3rd semester Java OOPs practicals. Can pay UPI right away.
+REQ301,BK205,Artificial Intelligence: A Modern Approach,750.0,STU101,Aarav Sharma,STU104,Ananya Iyer,Exchange,BK206,Pattern Recognition and Machine Learning,2026-11-12,PENDING,1,"Hi Aarav, I would love to exchange my Bishop ML book for your AI Russell & Norvig copy! Can meet at library."

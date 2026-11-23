@@ -1,0 +1,6 @@
+id,sellerId,reviewerId,reviewerName,rating,comment,date
+REV401,STU101,STU105,Vikram Malhotra,5.0,Smooth exchange! Aarav met near DTU library on time. Book was in top condition.,2026-11-09
+REV402,STU101,STU104,Ananya Iyer,5.0,Great student seller. Textbooks match the photos and description exactly. Recommended!,2026-11-01
+REV403,STU102,STU101,Aarav Sharma,4.8,Priya packed the book very nicely and shipped quickly via student courier. Thank you!,2026-10-25
+REV404,STU103,STU107,Devansh Gupta,4.5,Decent transaction. Clear communication and honest about minor highlighter marks.,2026-10-28
+REV405,STU104,STU106,Sneha Reddy,5.0,Prompt responses and very polite exchange. Both of us saved a lot of money on college texts.,2026-10-18

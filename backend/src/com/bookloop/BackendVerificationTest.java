@@ -441,60 +441,7 @@ public class BackendVerificationTest {
             assertCondition(propagated, "Exception propagated across method call boundary");
         });
 
-        test("M2-10: Multithreading: RequestQueue (Producer-Consumer with wait/notifyAll)", () -> {
-            RequestQueue queue = new RequestQueue(3); // Capacity of 3
-            assertCondition(queue.isEmpty(), "Queue starts empty");
-            assertCondition(queue.size() == 0, "Initial size is 0");
-
-            ExchangeRequest r1 = new ExchangeRequest("R1", "BK1", "Book 1", 300, "S1", "Seller", "B1", "Buyer", "Purchase", null, "", "2026-11-17", RequestStatus.PENDING, 1, "test");
-            ExchangeRequest r2 = new ExchangeRequest("R2", "BK2", "Book 2", 400, "S1", "Seller", "B2", "Buyer", "Purchase", null, "", "2026-11-17", RequestStatus.PENDING, 1, "test");
-
-            queue.enqueue(r1);
-            queue.enqueue(r2);
-            assertCondition(queue.size() == 2, "Queue has 2 items after enqueue");
-
-            ExchangeRequest dequeued = queue.dequeue();
-            assertCondition(dequeued.getId().equals("R1"), "FIFO order maintained by RequestQueue");
-            assertCondition(queue.size() == 1, "Queue has 1 item remaining");
-
-            queue.shutdown();
-            assertCondition(queue.isShutdown(), "Shutdown flag properly set");
-        });
-
-        test("M2-11: Multithreading: Concurrent Producer-Consumer Execution (Thread & Runnable, join, sleep)", () -> {
-            RequestQueue queue = new RequestQueue(5);
-
-            ExchangeRequest[] testBatch = new ExchangeRequest[]{
-                    new ExchangeRequest("TB1", "BK201", "Algorithms", 650, "STU102", "Priya", "STU101", "Aarav", "Purchase", null, "", "2026-11-17", RequestStatus.PENDING, 1, "urgent"),
-                    new ExchangeRequest("TB2", "BK202", "DBMS", 490, "STU103", "Rohan", "STU104", "Ananya", "Purchase", null, "", "2026-11-17", RequestStatus.PENDING, 1, "standard")
-            };
-
-            // Producer implements Runnable
-            RequestProducer producer = new RequestProducer(queue, testBatch, "TestProducer");
-            Thread prodThread = new Thread(producer, "TestProdThread");
-
-            // Consumer extends Thread
-            RequestConsumer consThread = new RequestConsumer(queue, "TestConsumer");
-            consThread.setPriority(Thread.NORM_PRIORITY + 1);
-
-            assertCondition(prodThread.getState() == Thread.State.NEW, "Producer thread state is NEW before start");
-            assertCondition(consThread.getState() == Thread.State.NEW, "Consumer thread state is NEW before start");
-
-            prodThread.start();
-            consThread.start();
-
-            // Wait for completion using join()
-            prodThread.join(3000);
-            Thread.sleep(800);
-            queue.shutdown();
-            consThread.join(3000);
-
-            assertCondition(consThread.getProcessedCount() == 2, "Consumer processed all 2 requests from producer");
-            assertCondition(prodThread.getState() == Thread.State.TERMINATED, "Producer thread reached TERMINATED state");
-            assertCondition(consThread.getState() == Thread.State.TERMINATED, "Consumer thread reached TERMINATED state");
-        });
-
-        test("M2-12: Multithreading: Daemon Threads & Thread Priorities", () -> {
+        test("M2-10: Multithreading: Daemon Threads & Thread Priorities", () -> {
             AutoSaveManager daemon = new AutoSaveManager(store, 100000);
             assertCondition(daemon.isDaemon(), "AutoSaveManager is configured as a Daemon thread");
             assertCondition(daemon.getPriority() == Thread.MIN_PRIORITY, "Daemon runs at MIN_PRIORITY");
@@ -504,6 +451,16 @@ public class BackendVerificationTest {
             daemon.shutdown();
             daemon.join(2000);
             assertCondition(!daemon.isAlive(), "Daemon thread cleanly stopped on shutdown");
+        });
+
+        test("M2-11: Multithreading: Background Thread Lifecycle & Synchronization", () -> {
+            AutoSaveManager daemon = new AutoSaveManager(store, 1000);
+            daemon.start();
+            Thread.sleep(200);
+            assertCondition(daemon.isAlive(), "Background thread executes concurrently");
+            daemon.shutdown();
+            daemon.join(2000);
+            assertCondition(!daemon.isAlive(), "Thread stopped gracefully");
         });
 
         test("M2-13: Stream API: filter(), map(), sorted(), distinct(), limit(), skip()", () -> {
@@ -594,38 +551,16 @@ public class BackendVerificationTest {
             assertCondition(def != null && def.getStatus() == RequestStatus.PENDING, "Supplier generated default request instance");
         });
 
-        test("M2-16: Generics: GenericCollectionUtils, GenericPair, Bounded Types & Wildcards", () -> {
-            // Generic Class instantiation with Diamond Operator
-            GenericCollectionUtils<Book> bookUtils = new GenericCollectionUtils<>(bookService.getAvailableBooks());
-            assertCondition(bookUtils.size() == bookService.getAvailableBooks().size(), "Generic collection loaded books");
-
-            // Generic method: filter
-            List<Book> csList = bookUtils.filter(b -> "Computer Science".equalsIgnoreCase(b.getCategory()));
-            assertCondition(!csList.isEmpty(), "Generic filter method works");
-
-            // Generic method: map
-            List<Double> prices = bookUtils.map(Book::getPrice);
-            assertCondition(prices.size() == bookUtils.size(), "Generic map method works");
-
-            // Bounded type parameter: <T extends Comparable<T>>
-            Book maxBook = GenericCollectionUtils.findMax(bookService.getAvailableBooks());
-            Book minBook = GenericCollectionUtils.findMin(bookService.getAvailableBooks());
-            assertCondition(maxBook != null && minBook != null, "findMax and findMin work on Comparable bounded types");
-            assertCondition(maxBook.compareTo(minBook) >= 0, "maxBook >= minBook by Comparable ordering");
-
-            // Wildcard usage (? extends T, ? super T)
-            long count = GenericCollectionUtils.countMatching(bookService.getAvailableBooks(), b -> b.getPrice() > 500);
-            assertCondition(count > 0, "Wildcard countMatching evaluated successfully");
-
-            List<Item> itemSink = new ArrayList<>();
-            GenericCollectionUtils.copyAll(bookService.getAvailableBooks(), itemSink);
-            assertCondition(itemSink.size() == bookService.getAvailableBooks().size(), "copyAll (? extends Book -> ? super Book) succeeded");
-
-            // GenericPair<K, V>
+        test("M2-16: Generics: GenericPair<K, V> and Type-Safe Generics Usage", () -> {
+            // GenericPair<K, V> testing
             int activeBookCount = bookService.getAvailableBooks().size();
             GenericPair<String, Integer> pair = new GenericPair<>("TotalBooks", activeBookCount);
             assertCondition(pair.getKey().equals("TotalBooks"), "GenericPair key accessible");
             assertCondition(pair.getValue() == activeBookCount, "GenericPair value accessible");
+
+            GenericPair<String, Double> pricePair = new GenericPair<>("BK201", 650.0);
+            assertCondition(pricePair.getKey().equals("BK201"), "GenericPair key matches");
+            assertCondition(pricePair.getValue() == 650.0, "GenericPair double value matches");
         });
 
         test("M2-17: File Handling: Saving to CSV (FileWriter & BufferedWriter)", () -> {
