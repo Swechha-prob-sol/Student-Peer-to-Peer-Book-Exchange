@@ -227,14 +227,13 @@ public class BackendVerificationTest {
             }
         });
 
-        test("M1-12: Collections Framework (TreeMap, TreeSet, LinkedHashSet, LinkedList, PriorityQueue)", () -> {
-            assertCondition(!store.getBooksByPriceIndex().isEmpty(), "TreeMap price index populated");
-            assertCondition(!store.getUniqueAuthors().isEmpty(), "TreeSet unique authors populated");
-            assertCondition(!store.getUniqueSubjects().isEmpty(), "LinkedHashSet unique subjects populated");
-            assertCondition(!store.getActivityLog().isEmpty(), "LinkedList activity log functioning");
-            assertCondition(!store.getPendingRequestsQueue().isEmpty(), "PriorityQueue pending requests functioning");
+        test("M1-12: Collections Framework (HashMap, HashSet, ArrayList, and Iterators)", () -> {
+            assertCondition(!store.getAllBooks().isEmpty(), "ArrayList of books populated");
+            assertCondition(!store.getUniqueAuthors().isEmpty(), "HashSet of unique authors populated");
+            assertCondition(!store.getUniqueSubjects().isEmpty(), "HashSet of unique subjects populated");
+            assertCondition(!store.getActivityLog().isEmpty(), "ArrayList activity log functioning");
 
-            // Iterator test
+            // Iterator test: safe traversal over collection
             int count = 0;
             Iterator<Book> it = store.getAllBooks().iterator();
             while (it.hasNext()) {

@@ -5,62 +5,37 @@ import com.bookloop.model.ExchangeRequest;
 import com.bookloop.model.Rating;
 import com.bookloop.model.Student;
 import com.bookloop.persistence.FileStorageManager;
+
 import java.io.IOException;
 import java.util.*;
 
 /**
- * In-memory Data Storage layer with file persistence integration.
- * Demonstrates:
- * - HashMap: O(1) primary key lookup for students, books, requests
- * - LinkedHashMap: preserves book insertion order
- * - TreeMap: naturally sorted indexing of books by price
- * - ArrayList: dynamic arrays for lists of books, reviews, and search results
- * - LinkedList: double-linked list for sequential recent activity logs
- * - HashSet: ensures strict uniqueness of registered email addresses
- * - LinkedHashSet: maintains unique subject categories in insertion order
- * - TreeSet: maintains unique author names sorted alphabetically
- * - PriorityQueue: prioritizes pending requests by date / urgency
- * - Deque (ArrayDeque): double-ended queue for recent search keyword history
- * - Iterator & ListIterator: safe collection traversal and modification
- * - Collections utility methods: sort, unmodifiableList, reverse, etc.
- * - File-based persistence: load/save to CSV files
+ * In-memory Data Storage layer for BookLoop.
+ * Demonstrates the core essential Java Collections Framework:
+ * - HashMap: O(1) primary key lookup for students, books, and requests by unique ID
+ * - HashSet: Fast constant-time uniqueness check to prevent duplicate email registrations
+ * - ArrayList: Dynamic resizable lists for books, ratings, search results, and activity logs
+ * - Collections utilities: sort(), unmodifiableList(), unmodifiableSet()
  */
 public class DataStore {
 
     // Singleton instance
     private static DataStore instance;
 
-    // 1. HashMap: Fast primary key lookups
+    // 1. HashMap: Fast primary key lookups by ID
     private final Map<String, Student> studentsMap = new HashMap<>();
     private final Map<String, Book> booksMap = new HashMap<>();
     private final Map<String, ExchangeRequest> requestsMap = new HashMap<>();
 
-    // 2. LinkedHashMap: Preserves insertion order of listings
-    private final Map<String, Book> recentListingsCache = new LinkedHashMap<>();
-
-    // 3. TreeMap: Tree-based sorted index of books by price
-    private final TreeMap<Double, List<Book>> booksByPriceIndex = new TreeMap<>();
-
-    // 4. HashSet: Constant-time uniqueness check for student emails
+    // 2. HashSet: Constant-time uniqueness check for student emails & subjects
     private final Set<String> registeredEmails = new HashSet<>();
+    private final Set<String> uniqueSubjects = new HashSet<>();
+    private final Set<String> uniqueAuthors = new HashSet<>();
 
-    // 5. LinkedHashSet: Preserves unique subject categories in discovery order
-    private final Set<String> uniqueSubjects = new LinkedHashSet<>();
-
-    // 6. TreeSet: Maintains unique authors in alphabetical order
-    private final SortedSet<String> uniqueAuthors = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-
-    // 7. ArrayList: List of all ratings / reviews
+    // 3. ArrayList: Dynamic arrays for ratings, activity logs, and searches
     private final List<Rating> ratingsList = new ArrayList<>();
-
-    // 8. LinkedList: Activity history / audit log
-    private final List<String> activityLog = new LinkedList<>();
-
-    // 9. PriorityQueue: Pending requests prioritized by date
-    private final PriorityQueue<ExchangeRequest> pendingRequestsQueue = new PriorityQueue<>();
-
-    // 10. Deque: Recent search history (LIFO stack & FIFO queue features)
-    private final Deque<String> recentSearches = new ArrayDeque<>();
+    private final List<String> activityLog = new ArrayList<>();
+    private final List<String> recentSearches = new ArrayList<>();
 
     // Private constructor for singleton pattern
     private DataStore() {
@@ -81,76 +56,62 @@ public class DataStore {
     /**
      * Loads all data from CSV files into memory.
      * Returns true if data was loaded from files, false if no saved data exists.
-     * Demonstrates exception propagation with throws clause.
      */
     public boolean loadFromFiles() throws IOException {
         if (!FileStorageManager.savedDataExists()) {
             return false;
         }
 
-        List<Student> students = FileStorageManager.loadStudents();
-        List<Book> books = FileStorageManager.loadBooks();
-        List<ExchangeRequest> requests = FileStorageManager.loadRequests();
-        List<Rating> ratings = FileStorageManager.loadRatings();
-
-        if (students.isEmpty() && books.isEmpty()) {
-            return false;
-        }
-
-        // Clear existing data before loading
         clearAll();
 
-        // Load students
-        for (Student s : students) {
+        // 1. Load Students
+        List<Student> loadedStudents = FileStorageManager.loadStudents();
+        for (Student s : loadedStudents) {
             studentsMap.put(s.getId(), s);
-            registeredEmails.add(s.getEmail().toLowerCase());
+            registeredEmails.add(s.getEmail().toLowerCase().trim());
         }
 
-        // Load books (and rebuild indexes)
-        for (Book b : books) {
+        // 2. Load Books
+        List<Book> loadedBooks = FileStorageManager.loadBooks();
+        for (Book b : loadedBooks) {
             booksMap.put(b.getId(), b);
-            recentListingsCache.put(b.getId(), b);
-            booksByPriceIndex.computeIfAbsent(b.getPrice(), k -> new ArrayList<>()).add(b);
             uniqueSubjects.add(b.getSubject());
             uniqueAuthors.add(b.getAuthor());
         }
 
-        // Load requests
-        for (ExchangeRequest r : requests) {
+        // 3. Load Requests
+        List<ExchangeRequest> loadedRequests = FileStorageManager.loadRequests();
+        for (ExchangeRequest r : loadedRequests) {
             requestsMap.put(r.getId(), r);
-            pendingRequestsQueue.offer(r);
         }
 
-        // Load ratings (without re-triggering seller rating recalculation)
-        ratingsList.addAll(ratings);
+        // 4. Load Ratings
+        List<Rating> loadedRatings = FileStorageManager.loadRatings();
+        ratingsList.addAll(loadedRatings);
 
-        logActivity("Data loaded from saved files (" + students.size() + " students, " +
-                books.size() + " books, " + requests.size() + " requests, " +
-                ratings.size() + " ratings)");
-
+        logActivity("Loaded " + studentsMap.size() + " students, " + booksMap.size() +
+                " books, " + requestsMap.size() + " requests from files.");
         return true;
     }
 
     /**
-     * Saves all data to CSV files.
-     * Demonstrates exception handling with try-catch-finally pattern.
+     * Saves all current in-memory data to CSV files.
      */
-    public void saveToFiles() {
-        boolean success = false;
-        try {
-            FileStorageManager.saveStudents(getAllStudents());
-            FileStorageManager.saveBooks(getAllBooks());
-            FileStorageManager.saveRequests(getAllRequests());
-            FileStorageManager.saveRatings(new ArrayList<>(ratingsList));
-            success = true;
-        } catch (IOException e) {
-            System.err.println("[ERROR] Failed to save data: " + e.getMessage());
-        } finally {
-            // finally block always executes
-            if (success) {
-                logActivity("All data saved to files successfully.");
-            } else {
-                logActivity("Data save attempt failed.");
+    public void saveToFiles() throws IOException {
+        synchronized (this) {
+            boolean success = false;
+            try {
+                FileStorageManager.saveStudents(getAllStudents());
+                FileStorageManager.saveBooks(getAllBooks());
+                FileStorageManager.saveRequests(getAllRequests());
+                FileStorageManager.saveRatings(new ArrayList<>(ratingsList));
+                success = true;
+            } finally {
+                if (success) {
+                    logActivity("All data saved to files successfully.");
+                } else {
+                    logActivity("Data save attempt failed.");
+                }
             }
         }
     }
@@ -161,7 +122,7 @@ public class DataStore {
 
     public boolean addStudent(Student student) {
         if (student == null || student.getId() == null) return false;
-        String emailLower = student.getEmail().toLowerCase();
+        String emailLower = student.getEmail().toLowerCase().trim();
         if (registeredEmails.contains(emailLower)) {
             return false; // Prevent duplicate email registration using HashSet
         }
@@ -201,16 +162,7 @@ public class DataStore {
     public boolean addBook(Book book) {
         if (book == null || book.getId() == null) return false;
 
-        // Add to primary HashMap
         booksMap.put(book.getId(), book);
-
-        // Add to LinkedHashMap (insertion order)
-        recentListingsCache.put(book.getId(), book);
-
-        // Add to TreeMap price index
-        booksByPriceIndex.computeIfAbsent(book.getPrice(), k -> new ArrayList<>()).add(book);
-
-        // Add to Sets
         uniqueSubjects.add(book.getSubject());
         uniqueAuthors.add(book.getAuthor());
 
@@ -229,10 +181,7 @@ public class DataStore {
 
     public List<Book> getActiveBooks() {
         List<Book> active = new ArrayList<>();
-        // Using standard Iterator to showcase Iterator usage
-        Iterator<Book> it = booksMap.values().iterator();
-        while (it.hasNext()) {
-            Book b = it.next();
+        for (Book b : booksMap.values()) {
             if (b.isAvailable()) {
                 active.add(b);
             }
@@ -245,7 +194,6 @@ public class DataStore {
             return false;
         }
         booksMap.put(updatedBook.getId(), updatedBook);
-        recentListingsCache.put(updatedBook.getId(), updatedBook);
         logActivity("Book updated: [" + updatedBook.getId() + "] " + updatedBook.getTitle());
         return true;
     }
@@ -254,25 +202,7 @@ public class DataStore {
         if (id == null || !booksMap.containsKey(id)) {
             return false;
         }
-        Book removed = booksMap.remove(id);
-        recentListingsCache.remove(id);
-
-        // Clean up from TreeMap price index
-        if (removed != null && booksByPriceIndex.containsKey(removed.getPrice())) {
-            List<Book> list = booksByPriceIndex.get(removed.getPrice());
-            // Using Iterator to safely remove
-            Iterator<Book> it = list.iterator();
-            while (it.hasNext()) {
-                if (it.next().getId().equals(id)) {
-                    it.remove();
-                    break;
-                }
-            }
-            if (list.isEmpty()) {
-                booksByPriceIndex.remove(removed.getPrice());
-            }
-        }
-
+        booksMap.remove(id);
         logActivity("Book removed from catalog: [" + id + "]");
         return true;
     }
@@ -281,12 +211,8 @@ public class DataStore {
         return Collections.unmodifiableSet(uniqueSubjects);
     }
 
-    public SortedSet<String> getUniqueAuthors() {
-        return Collections.unmodifiableSortedSet(uniqueAuthors);
-    }
-
-    public TreeMap<Double, List<Book>> getBooksByPriceIndex() {
-        return booksByPriceIndex;
+    public Set<String> getUniqueAuthors() {
+        return Collections.unmodifiableSet(uniqueAuthors);
     }
 
     // ==========================================
@@ -296,7 +222,6 @@ public class DataStore {
     public boolean addRequest(ExchangeRequest request) {
         if (request == null || request.getId() == null) return false;
         requestsMap.put(request.getId(), request);
-        pendingRequestsQueue.offer(request);
         logActivity(request.getRequestType() + " request sent for: \"" + request.getBookTitle() + "\"");
         return true;
     }
@@ -317,7 +242,7 @@ public class DataStore {
                 res.add(req);
             }
         }
-        Collections.sort(res); // Sorted by Comparable (date desc)
+        Collections.sort(res); // Sorted by natural Comparable (date desc)
         return res;
     }
 
@@ -332,10 +257,6 @@ public class DataStore {
         return res;
     }
 
-    public PriorityQueue<ExchangeRequest> getPendingRequestsQueue() {
-        return pendingRequestsQueue;
-    }
-
     // ==========================================
     // Rating Operations
     // ==========================================
@@ -343,7 +264,6 @@ public class DataStore {
     public void addRating(Rating rating) {
         if (rating == null) return;
         ratingsList.add(rating);
-        // Also update seller's running rating if student exists
         Student seller = getStudent(rating.getSellerId());
         if (seller != null) {
             seller.addRating(rating.getRating());
@@ -366,21 +286,20 @@ public class DataStore {
     }
 
     // ==========================================
-    // Search & History Operations
+    // Search History & Activity Log
     // ==========================================
 
     public void recordSearchKeyword(String keyword) {
         if (keyword != null && !keyword.trim().isEmpty()) {
-            // Keep at most 10 recent searches in Deque
-            if (recentSearches.size() >= 10) {
-                recentSearches.removeLast();
+            recentSearches.add(keyword.trim());
+            if (recentSearches.size() > 10) {
+                recentSearches.remove(0);
             }
-            recentSearches.push(keyword.trim());
         }
     }
 
-    public Deque<String> getRecentSearches() {
-        return recentSearches;
+    public List<String> getRecentSearches() {
+        return Collections.unmodifiableList(recentSearches);
     }
 
     public void logActivity(String log) {
@@ -402,14 +321,11 @@ public class DataStore {
         studentsMap.clear();
         booksMap.clear();
         requestsMap.clear();
-        recentListingsCache.clear();
-        booksByPriceIndex.clear();
         registeredEmails.clear();
         uniqueSubjects.clear();
         uniqueAuthors.clear();
         ratingsList.clear();
         activityLog.clear();
-        pendingRequestsQueue.clear();
         recentSearches.clear();
     }
 }
