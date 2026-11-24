@@ -1,4 +1,5 @@
 id,name,email,phone,joinedDate,college,department,semester,rating,reviewCount,booksSold,booksExchanged
+STU110,Arun,arun@college.ac.in,1234567889,2026-11-23,Chitkara,CSE,2,5.0,0,0,0
 STU102,Priya Patel,priya.patel@bits.ac.in,+91 98123 45678,2025-09-01,BITS Pilani,Information Technology,4,4.8,15,9,5
 STU101,Aarav Sharma,aarav.sharma@dtu.ac.in,+91 98765 43210,2025-08-15,Delhi Technological University (DTU),Computer Science and Engineering,5,4.9,20,12,6
 STU104,Ananya Iyer,ananya.iyer@vit.ac.in,+91 97654 32109,2025-10-10,VIT Vellore,Data Science & Artificial Intelligence,3,5.0,17,11,5
